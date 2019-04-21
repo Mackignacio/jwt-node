@@ -4,7 +4,8 @@
   "description": "test",
   "main": "index.js",
   "scripts": {
-    "start": "tsnd --respawn ./src/index.ts"
+    "start": "tsnd --respawn ./src/index.ts",
+    "test": "jest --detectOpenHandles --forceExit --runInBand --verbose"
   },
   "keywords": [
     "test"
