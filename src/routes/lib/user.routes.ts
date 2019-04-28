@@ -25,24 +25,41 @@ class UserRoutes {
           res.json(data);
         })
         .catch(error => {
-          res.status(400).send({ message: error });
+          if (error.message.includes("Cast to ObjectId failed")) {
+            res.status(400).send({ message: `User "${_id}" not found!` });
+          } else {
+            res.status(400).send({ message: error });
+          }
         });
     };
   }
 
   addUser() {
     return (req: Request, res: Response) => {
-      const { name, account_type, password } = req.body;
-      const user = new Users({ name, account_type, password });
+      if (Object.entries(req.body).length === 0) {
+        return res.status(400).send({ message: "Body is empty!" });
+      } else if (typeof req.body.name === "undefined") {
+        return res.status(400).send({ message: "Name is empty!" });
+      } else if (typeof req.body.password === "undefined") {
+        return res.status(400).send({ message: "Password is empty!" });
+      } else if (typeof req.body.account_type === "undefined") {
+        return res.status(400).send({ message: "Account Type is empty!" });
+      } else {
+        const user = new Users({ ...req.body });
 
-      user
-        .save()
-        .then(data => {
-          res.json({ data, message: "Added User!" });
-        })
-        .catch(error => {
-          res.status(400).send({ message: error });
-        });
+        user
+          .save()
+          .then(data => {
+            res.json({ data, message: "Added User!" });
+          })
+          .catch(error => {
+            if (error.errmsg.includes("duplicate")) {
+              res.status(400).send({ message: "User already exist!" });
+            } else {
+              res.status(400).send({ message: error });
+            }
+          });
+      }
     };
   }
 
@@ -64,29 +81,50 @@ class UserRoutes {
   deleteUser() {
     return (req: Request, res: Response) => {
       const _id = req.params.id;
-
-      Users.findByIdAndRemove(_id)
-        .then(data => {
-          res.json({ data, message: "Deleted User!" });
-        })
-        .catch(error => {
-          res.status(400).send({ message: error });
-        });
+      try {
+        Users.findByIdAndRemove(_id)
+          .then(data => {
+            if (data === null) {
+              res.status(404).send({ message: `Can't delete ID of ${_id} because its not exist!` });
+            } else {
+              res.json({ data, message: "Deleted User!" });
+            }
+          })
+          .catch(error => {
+            res.status(400).send({ message: error });
+          });
+      } catch (error) {
+        res.status(400).send({ message: error });
+      }
     };
   }
 
   userLogin() {
     return (req: Request, res: Response) => {
-      const { name, password } = req.body;
+      if (Object.entries(req.body).length === 0) {
+        return res.status(400).send({ message: "Body is empty!" });
+      } else if (typeof req.body.name === "undefined") {
+        return res.status(400).send({ message: "Name is empty!" });
+      } else if (typeof req.body.password === "undefined") {
+        return res.status(400).send({ message: "Password is empty!" });
+      } else {
+        const { name, password } = req.body;
 
-      Users.find({ name, password })
-        .then(data => {
-          const token = jwt.generateToken({ ...data }, config.SECRET, "30s");
-          res.json({ token, message: "You are login" });
-        })
-        .catch(error => {
-          res.status(400).send({ message: error });
-        });
+        Users.findOne({ name, password })
+          .then(data => {
+            if (data === null) {
+              res.status(400).send({ message: "Incorrect username and password!" });
+            } else {
+              const token = jwt.generateToken({ name, password }, config.SECRET, "30s");
+              res.json({ token, message: "You are login" });
+            }
+          })
+          .catch(error => {
+            console.log(error);
+
+            res.status(400).send({ message: error });
+          });
+      }
     };
   }
 }
