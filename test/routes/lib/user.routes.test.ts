@@ -215,6 +215,34 @@ describe("User Test", () => {
     expect(result.body).toEqual({ ...data.user, _id: "5cc5472722fc6d096f24b8fd" });
   });
 
+  test("#Patch - Update with incorrect ID", async () => {
+    const id = "5cc5472722fc6d096f24bxxx";
+    const test = { ...data.user, _id: "5cc5472722fc6d096f24b8fd", name: "updated" };
+    const result = await supertest
+      .patch(`/user/${id}`)
+      .send(test)
+      .set("Content-Type", "application/json")
+      .set("Authorization", token);
+    console.log(result.body);
+
+    expect(result.status).toEqual(400);
+    expect(result.body.message).toEqual("Path _id with value of 5cc5472722fc6d096f24bxxx is not valid property!");
+  });
+
+  test("#Patch - Update one user", async () => {
+    const id = "5cc5472722fc6d096f24b8fd";
+    const test = { ...data.user, _id: "5cc5472722fc6d096f24b8fd", name: "updated" };
+    const result = await supertest
+      .patch(`/user/${id}`)
+      .send(test)
+      .set("Content-Type", "application/json")
+      .set("Authorization", token);
+
+    expect(result.status).toEqual(200);
+    expect(result.body.data).toEqual({ ...test });
+    expect(result.body.message).toEqual("Updated User!");
+  });
+
   test("#Delete - single document w/o auth", async () => {
     const result = await supertest.delete("/user/5cc5472722fc6d096f24b8fa").set("Content-Type", "application/json");
 
