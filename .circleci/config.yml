@@ -16,7 +16,7 @@ jobs:
       # - image: circleci/mongo:3.4.4
 
     environment:
-      - MONGO_CONNECTION_URL_TEST: "mongodb://localhost:27017/test"
+      - MONGO_URL_TEST: "mongodb://localhost:27017/test"
 
       # Dependecies.
       - run:
