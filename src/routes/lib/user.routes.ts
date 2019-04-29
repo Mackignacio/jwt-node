@@ -70,10 +70,18 @@ class UserRoutes {
 
       Users.findByIdAndUpdate(_id, body)
         .then(data => {
-          res.json({ data, message: "Updated User!" });
+          const js = JSON.parse(JSON.stringify(data));
+          res.json({ data: { ...js, ...body }, message: "Updated User!" });
         })
         .catch(error => {
-          res.status(400).send({ message: error });
+          if (error.message.includes("Cast to ObjectId failed for value")) {
+            const path = error.message.split(`path "`)[1].split(`"`)[0];
+            const value = error.message.split(`value "`)[1].split(`"`)[0];
+
+            res.status(400).send({ message: `Path ${path} with value of ${value} is not valid property!` });
+          } else {
+            res.status(400).send({ message: error });
+          }
         });
     };
   }
