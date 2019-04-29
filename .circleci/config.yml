@@ -15,9 +15,20 @@ jobs:
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/mongo:3.4.4
 
+    environment:
+      - MONGO_URL_TEST: "mongodb://localhost:27017/test"
+
     working_directory: ~/repo
 
     steps:
+      # Dependecies.
+      - run:
+          name: Install MongoDB Shell
+          command: |
+            sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+            echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/3.6 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.6.list
+            sudo apt-get update
+            sudo apt-get install -y --force-yes mongodb-org-shell=3.6.10
       - checkout
 
       # Download and cache dependencies
