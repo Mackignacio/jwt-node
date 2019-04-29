@@ -223,7 +223,6 @@ describe("User Test", () => {
       .send(test)
       .set("Content-Type", "application/json")
       .set("Authorization", token);
-    console.log(result.body);
 
     expect(result.status).toEqual(400);
     expect(result.body.message).toEqual("Path _id with value of 5cc5472722fc6d096f24bxxx is not valid property!");
